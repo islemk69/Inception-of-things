@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+kubectl port-forward svc/argocd-server -n argocd 8081:443
+
+recuperer le secret : 
+
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d echo
+
+
+tester la v1 :
+curl -H "Host: wil.local" http://localhost:8080
+
+faire un commit et modifier en vd sur deployment
+
+retest 
+
+curl -H "Host: wil.local" http://localhost:8080
