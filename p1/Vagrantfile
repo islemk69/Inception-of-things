@@ -1,0 +1,59 @@
+# Inception-of-Things - Part 1
+# Provider: VirtualBox
+# Guest OS: Debian 12 (bookworm) - latest stable
+# Machines: ikaismouS (server) / ikaismouSW (worker)
+# Resources: 1 CPU, 1024MB RAM (adjust to 512MB if needed)
+# Network: Host-only (eth1) with fixed IPs
+
+Vagrant.configure("2") do |config|
+  # Base image (Debian 12)
+  config.vm.box = "debian/bookworm64"
+
+  # Use VirtualBox explicitly
+  config.vm.provider "virtualbox"
+
+  # Disable synced folder to avoid permission issues; re-enable if needed
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # Common SSH options (passwordless via Vagrant's key by default)
+  config.ssh.insert_key = true
+
+    # ----- Worker (agent) -----
+  config.vm.define "ikaismouSW" do |w|
+    w.vm.hostname = "ikaismouSW"
+    w.vm.network "private_network", ip: "192.168.56.111"  # eth1
+    w.vm.provider "virtualbox" do |vb|
+      vb.name = "ikaismouSW"
+      vb.cpus = 1
+      vb.memory = 1024
+    end
+    # Provision placeholder (add K3s agent install later)
+    w.vm.provision "shell", inline: <<-SHELL
+      set -e
+      echo "[ikaismouSW] Bootstrap minimal..."
+      sudo apt-get update -y
+      sudo apt-get install -y curl ca-certificates
+      ip a show eth1
+    SHELL
+  end
+
+  # ----- Server (controller) -----
+  config.vm.define "ikaismouS" do |s|
+    s.vm.hostname = "ikaismouS"
+    s.vm.network "private_network", ip: "192.168.56.110"  # eth1
+    s.vm.provider "virtualbox" do |vb|
+      vb.name = "ikaismouS"
+      vb.cpus = 1
+      vb.memory = 1024
+    end
+    s.vm.provision "shell", inline: <<-SHELL
+      set -e
+      echo "[ikaismouSW] Bootstrap minimal..."
+      sudo apt-get update -y
+      sudo apt-get install -y curl ca-certificates
+      ip a show eth1
+    SHELL
+  end
+
+
+end
