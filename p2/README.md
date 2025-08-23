@@ -119,16 +119,3 @@ vagrant destroy -f
 
 ---
 
-## ❗ Troubleshooting
-- **Ingress renvoie 404 pour les hosts non définis** → vérifiez que l’Ingress contient bien une **règle sans `host`** (catch‑all) pointant vers `app3`.
-- **Pods restent en `ContainerCreating`** → attendez quelques secondes ou regardez `kubectl describe pod <name>` pour voir l’événement bloquant.
-- **Pas de ressources listées juste après l’apply** → le provision script applique immédiatement; les pods peuvent mettre 5–10s à apparaître (`kubectl get pods -w`).
-
----
-
-## 🙅 À ne pas versionner
-Ajoutez (à la racine du repo) dans `.gitignore` :
-```
-**/.vagrant/
-**/node-token
-```
