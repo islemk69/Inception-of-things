@@ -12,20 +12,42 @@ Vagrant.configure("2") do |config|
   # Use VirtualBox explicitly
   config.vm.provider "virtualbox"
 
-  # Disable synced folder to avoid permission issues; re-enable if needed
-  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # Common SSH options (passwordless via Vagrant's key by default)
   config.ssh.insert_key = true
 
-    # ----- Worker (agent) -----
+  # ----- Server (controller) -----
+  config.vm.define "ikaismouS" do |s|
+    s.vm.hostname = "ikaismouS"
+    s.vm.network "private_network", ip: "192.168.56.110"  # eth1
+    s.vm.provider "virtualbox" do |vb|
+      vb.name = "ikaismouS"
+      vb.cpus = 2
+      vb.memory = 4096
+    end
+    s.vm.provision "shell", inline: <<-SHELL
+       set -e
+      echo "[ikaismouS] Bootstrap minimal..."
+      sudo apt-get update -y
+      sudo apt-get install -y curl ca-certificates
+      # Installation K3s avec IP fixe et SAN TLS
+      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--node-ip 192.168.56.110 --tls-san 192.168.56.110" sh -
+      # On sauvegarde le token pour que l’agent puisse le lire
+      cp /var/lib/rancher/k3s/server/node-token /vagrant/node-token
+      ip a show eth1
+    SHELL
+
+  end
+
+
+  # ----- Worker (agent) -----
   config.vm.define "ikaismouSW" do |w|
     w.vm.hostname = "ikaismouSW"
     w.vm.network "private_network", ip: "192.168.56.111"  # eth1
     w.vm.provider "virtualbox" do |vb|
       vb.name = "ikaismouSW"
-      vb.cpus = 1
-      vb.memory = 1024
+      vb.cpus = 2
+      vb.memory = 4096
     end
     # Provision placeholder (add K3s agent install later)
     w.vm.provision "shell", inline: <<-SHELL
@@ -34,26 +56,16 @@ Vagrant.configure("2") do |config|
       sudo apt-get update -y
       sudo apt-get install -y curl ca-certificates
       ip a show eth1
+       # Attendre que le fichier node-token soit présent (le server doit l’avoir créé)
+      while [ ! -f /vagrant/node-token ]; do
+        echo "Attente du token K3s..."
+        sleep 5
+      done
+      TOKEN=$(cat /vagrant/node-token)
+      curl -sfL https://get.k3s.io | K3S_URL="https://192.168.56.110:6443" K3S_TOKEN="$TOKEN" INSTALL_K3S_EXEC="--node-ip 192.168.56.111" sh -
     SHELL
   end
 
-  # ----- Server (controller) -----
-  config.vm.define "ikaismouS" do |s|
-    s.vm.hostname = "ikaismouS"
-    s.vm.network "private_network", ip: "192.168.56.110"  # eth1
-    s.vm.provider "virtualbox" do |vb|
-      vb.name = "ikaismouS"
-      vb.cpus = 1
-      vb.memory = 1024
-    end
-    s.vm.provision "shell", inline: <<-SHELL
-      set -e
-      echo "[ikaismouSW] Bootstrap minimal..."
-      sudo apt-get update -y
-      sudo apt-get install -y curl ca-certificates
-      ip a show eth1
-    SHELL
-  end
 
 
 end
