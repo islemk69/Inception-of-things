@@ -1,0 +1,83 @@
+global:
+  edition: ce
+  hosts:
+    domain: gitlab.local
+    externalIP: 10.13.200.139
+  ingress:
+    configureCertmanager: false
+    class: traefik
+    tls:
+      enabled: false
+  minio:
+    enabled: false
+  appConfig:
+    object_store:
+      enabled: false
+    artifacts:
+      enabled: false
+    lfs:
+      enabled: false
+    uploads:
+      enabled: false
+    packages:
+      enabled: false
+    backups:
+      object_store:
+        enabled: false
+
+certmanager:
+  enabled: false
+
+nginx-ingress:
+  enabled: false
+
+prometheus:
+  enabled: false
+
+gitlab-runner:
+  enabled: false
+
+registry:
+  enabled: false
+
+gitlab:
+  gitaly:
+    persistence:
+      size: 1Gi
+  webservice:
+    minReplicas: 1
+    maxReplicas: 1
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        memory: 1Gi
+  sidekiq:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+  toolbox:
+    enabled: false
+
+redis:
+  master:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+
+postgresql:
+  primary:
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        memory: 1Gi
+
