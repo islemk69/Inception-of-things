@@ -5,6 +5,8 @@ echo "[INFO] Installation de Docker"
 if ! command -v docker &> /dev/null; then
   sudo pacman -S docker docker-compose
   sudo usermod -aG docker $USER
+  sudo systemctl enable docker
+  sudo systemctl start docker
 else
   echo "Docker déjà installé"
 fi
