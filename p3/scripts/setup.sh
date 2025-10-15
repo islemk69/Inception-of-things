@@ -61,35 +61,11 @@ kubectl patch deployment argocd-server -n argocd --type=json -p='[
 ]'
 kubectl rollout status deployment argocd-server -n argocd
 
-echo "[INFO] === Création de l'IngressRoute Traefik (HTTPS via 8080) ==="
-cat <<EOF | kubectl apply -f -
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: argocd-server
-  namespace: argocd
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    # UI Web
-    - kind: Rule
-      match: Host(\`argocd.local\`)
-      priority: 10
-      services:
-        - name: argocd-server
-          port: 80
-    # gRPC CLI
-    - kind: Rule
-      match: Host(\`argocd.local\`) && Header(\`Content-Type\`, \`application/grpc\`)
-      priority: 11
-      services:
-        - name: argocd-server
-          port: 80
-          scheme: h2c
-  tls:
-    certResolver: default
-EOF
+echo "[INFO] === Création de l'IngressRoute Traefik ==="
+kubectl apply -f /home/islem/Inception-of-things/p3/conf/argocd-ingressroute.yml
+echo "[INFO] Attente que le service ArgoCD soit disponible..."
+kubectl wait --for=condition=available --timeout=120s deployment/argocd-server -n argocd
+sleep 5
 
 echo "[INFO] === Installation du client ArgoCD ==="
 if ! command -v argocd &>/dev/null; then
@@ -105,7 +81,7 @@ ADMIN_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpat
 kubectl create namespace dev --dry-run=client -o yaml | kubectl apply -f -
 
 echo "[INFO] === Connexion CLI à ArgoCD via Ingress HTTPS ==="
-argocd login argocd.local:8080 --username admin --password "${ADMIN_PASS}" --insecure --grpc-web
+argocd login argocd.local --username admin --password "${ADMIN_PASS}" --insecure --grpc-web
 
 echo "[INFO] === Ajout du dépôt GitHub ==="
 argocd repo add https://github.com/islemk69/Inception-of-things.git \
@@ -128,9 +104,10 @@ argocd app wait p3-app --health --timeout 300
 
 echo "[INFO] ✅ Déploiement terminé !"
 echo ""
-echo "🔗 Accès à ArgoCD : https://argocd.local:8080"
+echo "🔗 Accès à ArgoCD : https://argocd.local"
 echo "👤 Identifiant : admin"
 echo "🔑 Mot de passe : ${ADMIN_PASS}"
 echo ""
 echo "⚠️ Assure-toi d'avoir dans ton /etc/hosts :"
 echo "    127.0.0.1 argocd.local"
+echo "    127.0.0.1 ikaismou.local"

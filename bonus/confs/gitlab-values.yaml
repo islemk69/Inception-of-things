@@ -2,7 +2,6 @@ global:
   edition: ce
   hosts:
     domain: gitlab.local
-    externalIP: 10.13.200.139
   ingress:
     configureCertmanager: false
     class: traefik
@@ -25,6 +24,7 @@ global:
       object_store:
         enabled: false
 
+# Désactive tout ce qui n’est pas indispensable
 certmanager:
   enabled: false
 
@@ -40,44 +40,57 @@ gitlab-runner:
 registry:
   enabled: false
 
+# Composants GitLab principaux
 gitlab:
+  kas:
+    enabled: false
+  gitlab-exporter:
+    enabled: false
+  gitlab-shell:
+    enabled: false
+  sidekiq:
+    enabled: false       # ⚠️ CI/CD inutile -> désactivé
+  toolbox:
+    enabled: false
+
   gitaly:
     persistence:
-      size: 1Gi
+      enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+
   webservice:
     minReplicas: 1
     maxReplicas: 1
     resources:
       requests:
         cpu: 250m
-        memory: 512Mi
-      limits:
         memory: 1Gi
-  sidekiq:
-    resources:
-      requests:
-        cpu: 100m
-        memory: 256Mi
       limits:
-        memory: 512Mi
-  toolbox:
-    enabled: false
+        memory: 2Gi
 
 redis:
   master:
+    persistence:
+      enabled: false
     resources:
       requests:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 50m
+        memory: 64Mi
       limits:
-        memory: 256Mi
+        memory: 128Mi
 
 postgresql:
   primary:
+    persistence:
+      enabled: false
     resources:
       requests:
         cpu: 250m
-        memory: 512Mi
+        memory: 256Mi
       limits:
-        memory: 1Gi
-
+        memory: 512Mi

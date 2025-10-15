@@ -1,17 +1,17 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
-  name: gitlab-ingress
+  name: gitlab
   namespace: gitlab
 spec:
-  rules:
-  - host: gitlab.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: gitlab-webservice-default
-            port:
-              number: 8080
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`gitlab.local`)
+      priority: 10
+      services:
+        - name: gitlab-webservice-default
+          port: 8080
+  tls:
+    certResolver: default
