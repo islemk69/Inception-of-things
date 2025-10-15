@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wil-ingressroute
+  namespace: dev
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`wil.local`)
+      services:
+        - name: wil-playground
+          port: 8888
+  tls:
+    certResolver: default

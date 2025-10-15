@@ -39,8 +39,7 @@ echo "[INFO] === Création du cluster k3d ==="
 k3d cluster delete mycluster || true
 k3d cluster create mycluster \
   --servers 1 --agents 1 \
-  -p "8080:443@loadbalancer" \
-  -p "8081:80@loadbalancer"
+  -p "443:443@loadbalancer"
 
 echo "[INFO] === Installation d'ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
