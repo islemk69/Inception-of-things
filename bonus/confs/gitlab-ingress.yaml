@@ -1,4 +1,15 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: gitlab-headers
+  namespace: gitlab
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+      X-Forwarded-Ssl: "on"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: gitlab
@@ -9,9 +20,11 @@ spec:
   routes:
     - kind: Rule
       match: Host(`gitlab.local`)
-      priority: 10
       services:
         - name: gitlab-webservice-default
-          port: 8080
+          port: 8181    # ✅ c’est ce port qu’utilise GitLab pour HTTPS interne
+      middlewares:
+        - name: gitlab-headers
   tls:
-    certResolver: default
+    certResolver: default   # ✅ sans le point à la fin
+

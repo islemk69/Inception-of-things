@@ -23,21 +23,23 @@ global:
     backups:
       object_store:
         enabled: false
+  gitlab-runner:
+    enabled: false   # <- c’est ici que GitLab regarde pour désactiver le runner globalement
 
-# Désactive tout ce qui n’est pas indispensable
+# Désactive complètement les sous-charts inutiles
 certmanager:
-  enabled: false
-
-nginx-ingress:
   enabled: false
 
 prometheus:
   enabled: false
 
-gitlab-runner:
+nginx-ingress:
   enabled: false
 
 registry:
+  enabled: false
+
+gitlab-runner:
   enabled: false
 
 # Composants GitLab principaux
@@ -49,7 +51,7 @@ gitlab:
   gitlab-shell:
     enabled: false
   sidekiq:
-    enabled: false       # ⚠️ CI/CD inutile -> désactivé
+    enabled: false
   toolbox:
     enabled: false
 
@@ -94,3 +96,4 @@ postgresql:
         memory: 256Mi
       limits:
         memory: 512Mi
+
