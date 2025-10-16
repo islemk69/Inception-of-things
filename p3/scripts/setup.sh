@@ -55,7 +55,7 @@ kubectl patch deployment argocd-server -n argocd --type=json -p='[
 kubectl rollout status deployment argocd-server -n argocd
 
 echo "[INFO] === Création de l'IngressRoute Traefik ==="
-kubectl apply -f ../conf/argocd-ingressroute.yml
+kubectl apply -f ../confs/argocd-ingressroute.yml
 echo "[INFO] Attente que le service ArgoCD soit disponible..."
 kubectl wait --for=condition=available --timeout=120s deployment/argocd-server -n argocd
 sleep 5
@@ -77,12 +77,12 @@ echo "[INFO] === Connexion CLI à ArgoCD via Ingress HTTPS ==="
 argocd login argocd.local --username admin --password "${ADMIN_PASS}" --insecure --grpc-web
 
 echo "[INFO] === Ajout du dépôt GitHub ==="
-argocd repo add https://github.com/islemk69/Inception-of-things.git
+argocd repo add https://github.com/islemk69/vburton-ikaismou-app.git
 
 echo "[INFO] === Création de l'application ArgoCD (autosync) ==="
 argocd app create p3-app \
-  --repo https://github.com/islemk69/Inception-of-things.git \
-  --path p3/app \
+  --repo https://github.com/islemk69/vburton-ikaismou-app.git \
+  --path / \
   --dest-server https://kubernetes.default.svc \
   --dest-namespace dev \
   --sync-policy automated \

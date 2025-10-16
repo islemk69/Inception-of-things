@@ -4,9 +4,9 @@ set -e
 # === CONFIGURATION ===
 NAMESPACE="gitlab"
 RELEASE_NAME="gitlab"
-VALUES_FILE="/home/islem/Inception-of-things/bonus/confs/gitlab-values.yaml"
-INGRESSROUTE_FILE="/home/islem/Inception-of-things/bonus/confs/gitlab-ingress.yaml"
-APP_DIR="/home/islem/Inception-of-things/bonus/app"
+VALUES_FILE="../confs/gitlab-values.yaml"
+INGRESSROUTE_FILE="../confs/gitlab-ingressroute.yaml"
+APP_DIR="../app"
 PROJECT_NAME="vburton-ikaismou-app"
 GITLAB_URL="https://gitlab.local"
 
@@ -18,7 +18,7 @@ RESET="\033[0m"
 
 echo -e "${YELLOW}🧹 Nettoyage des anciens dépôts ArgoCD...${RESET}"
 argocd app delete p3-app --yes || true
-argocd repo rm https://github.com/islemk69/Inception-of-things.git || true
+argocd repo rm https://github.com/islemk69/vburton-ikaismou-app.git || true
 
 # === Vérification de Helm ===
 echo -e "${YELLOW}⚙️ Vérification de Helm...${RESET}"
