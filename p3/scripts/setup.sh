@@ -55,7 +55,7 @@ kubectl patch deployment argocd-server -n argocd --type=json -p='[
 kubectl rollout status deployment argocd-server -n argocd
 
 echo "[INFO] === Création de l'IngressRoute Traefik ==="
-kubectl apply -f /home/islem/Inception-of-things/p3/conf/argocd-ingressroute.yml
+kubectl apply -f ../conf/argocd-ingressroute.yml
 echo "[INFO] Attente que le service ArgoCD soit disponible..."
 kubectl wait --for=condition=available --timeout=120s deployment/argocd-server -n argocd
 sleep 5

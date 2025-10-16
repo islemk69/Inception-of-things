@@ -8,7 +8,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`wil.local`)
+      match: Host(`vburton-ikaismou.local`)
       services:
         - name: wil-playground
           port: 8888
