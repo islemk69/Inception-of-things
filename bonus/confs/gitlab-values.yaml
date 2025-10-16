@@ -1,7 +1,9 @@
 global:
   edition: ce
   hosts:
-    domain: gitlab.local
+    domain: local
+    gitlab:
+      name: gitlab.local
   ingress:
     configureCertmanager: false
     class: traefik
@@ -24,9 +26,8 @@ global:
       object_store:
         enabled: false
   gitlab-runner:
-    enabled: false   # <- c’est ici que GitLab regarde pour désactiver le runner globalement
+    enabled: false  
 
-# Désactive complètement les sous-charts inutiles
 certmanager:
   enabled: false
 

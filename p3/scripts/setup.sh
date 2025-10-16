@@ -1,14 +1,6 @@
 #!/bin/bash
 set -e
 
-# === Vérification du token GitHub ===
-if [ -z "$GITHUB_TOKEN" ]; then
-  echo "[ERREUR] Variable GITHUB_TOKEN manquante."
-  echo "Exportez-la avant de lancer le script :"
-  echo "  export GITHUB_TOKEN='ton_token_github'"
-  exit 1
-fi
-
 echo "[INFO] === Installation de Docker ==="
 if ! command -v docker &>/dev/null; then
   sudo pacman -S --noconfirm docker docker-compose
@@ -39,7 +31,8 @@ echo "[INFO] === Création du cluster k3d ==="
 k3d cluster delete mycluster || true
 k3d cluster create mycluster \
   --servers 1 --agents 1 \
-  -p "443:443@loadbalancer"
+  -p "443:443@loadbalancer" \
+  --host-alias 10.0.2.15:gitlab.local
 
 echo "[INFO] === Installation d'ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
@@ -84,9 +77,7 @@ echo "[INFO] === Connexion CLI à ArgoCD via Ingress HTTPS ==="
 argocd login argocd.local --username admin --password "${ADMIN_PASS}" --insecure --grpc-web
 
 echo "[INFO] === Ajout du dépôt GitHub ==="
-argocd repo add https://github.com/islemk69/Inception-of-things.git \
-  --username islemk69 \
-  --password "$GITHUB_TOKEN"
+argocd repo add https://github.com/islemk69/Inception-of-things.git
 
 echo "[INFO] === Création de l'application ArgoCD (autosync) ==="
 argocd app create p3-app \

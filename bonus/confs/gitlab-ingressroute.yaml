@@ -22,9 +22,9 @@ spec:
       match: Host(`gitlab.local`)
       services:
         - name: gitlab-webservice-default
-          port: 8181    # ✅ c’est ce port qu’utilise GitLab pour HTTPS interne
+          port: 8181
       middlewares:
         - name: gitlab-headers
   tls:
-    certResolver: default   # ✅ sans le point à la fin
+    secretName: gitlab-tls-cert
 
