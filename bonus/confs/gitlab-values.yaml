@@ -5,13 +5,12 @@ global:
     gitlab:
       name: gitlab.local
   ingress:
-    configureCertmanager: false
+    enabled: false
     class: traefik
     tls:
-      enabled: false
-  minio:
-    enabled: false
+      enabled: true
   appConfig:
+    external_url: "https://gitlab.local"
     object_store:
       enabled: false
     artifacts:
@@ -26,7 +25,7 @@ global:
       object_store:
         enabled: false
   gitlab-runner:
-    enabled: false  
+    enabled: false
 
 certmanager:
   enabled: false
@@ -43,7 +42,7 @@ registry:
 gitlab-runner:
   enabled: false
 
-# Composants GitLab principaux
+# === Composants GitLab principaux ===
 gitlab:
   kas:
     enabled: false
@@ -67,6 +66,10 @@ gitlab:
         memory: 256Mi
 
   webservice:
+    service:
+      httpsPort: 8181
+      https: true
+      externalPort: 443
     minReplicas: 1
     maxReplicas: 1
     resources:
@@ -97,4 +100,5 @@ postgresql:
         memory: 256Mi
       limits:
         memory: 512Mi
-
+certmanager-issuer:
+  email: "admin@gitlab.local"

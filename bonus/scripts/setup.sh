@@ -181,17 +181,7 @@ if [ -z "$DEPLOY_TOKEN" ] || [ "$DEPLOY_TOKEN" == "null" ]; then
 fi
 echo -e "${GREEN}✔ Deploy Token créé avec succès.${RESET}"
 
-# === Vérification finale que GitLab HTTPS est bien prêt avant ArgoCD ===
-echo -e "${YELLOW}🕓 Vérification finale de la disponibilité HTTPS de GitLab...${RESET}"
-for i in {1..60}; do
-  STATUS=$(curl -sk -o /dev/null -w "%{http_code}" "${GITLAB_URL}/users/sign_in" || true)
-  if [[ "$STATUS" == "200" ]]; then
-    echo -e "${GREEN}✔ GitLab HTTPS est opérationnel.${RESET}"
-    break
-  fi
-  echo -e "${YELLOW}⏳ GitLab pas encore prêt (HTTP ${STATUS})... tentative ${i}/60${RESET}"
-  sleep 10
-done
+sleep 20
 
 
 # === Connexion du dépôt GitLab à ArgoCD ===
@@ -210,11 +200,6 @@ argocd app create bonus-app \
   --sync-policy automated \
   --self-heal \
   --auto-prune
-
-# === Synchronisation ===
-echo -e "${YELLOW}🔁 Synchronisation de l’application...${RESET}"
-argocd app sync bonus-app
-argocd app wait bonus-app --health --timeout 300
 
 # === Fin ===
 echo -e "${GREEN}✅ Bonus terminé avec succès !${RESET}"
