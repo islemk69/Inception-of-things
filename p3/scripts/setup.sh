@@ -3,7 +3,19 @@ set -e
 
 echo "[INFO] === Installation de Docker ==="
 if ! command -v docker &>/dev/null; then
-  sudo pacman -S --noconfirm docker docker-compose
+  sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update
+  sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   sudo usermod -aG docker $USER
   sudo systemctl enable docker
   sudo systemctl start docker
@@ -29,10 +41,7 @@ fi
 
 echo "[INFO] === Création du cluster k3d ==="
 k3d cluster delete mycluster || true
-k3d cluster create mycluster \
-  --servers 1 --agents 1 \
-  -p "443:443@loadbalancer" \
-  --host-alias 10.0.2.15:gitlab.local
+k3d cluster create mycluster --servers 1 --agents 1 -p "80:80@loadbalancer" -p "443:443@loadbalancer" --host-alias 10.13.200.149:gitlab.local
 
 echo "[INFO] === Installation d'ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
@@ -82,16 +91,12 @@ argocd repo add https://github.com/islemk69/vburton-ikaismou-app.git
 echo "[INFO] === Création de l'application ArgoCD (autosync) ==="
 argocd app create p3-app \
   --repo https://github.com/islemk69/vburton-ikaismou-app.git \
-  --path / \
+  --path ./ \
   --dest-server https://kubernetes.default.svc \
   --dest-namespace dev \
   --sync-policy automated \
   --self-heal \
   --auto-prune
-
-echo "[INFO] === Synchronisation de l'application ==="
-argocd app sync p3-app
-argocd app wait p3-app --health --timeout 300
 
 echo "[INFO] ✅ Déploiement terminé !"
 echo ""

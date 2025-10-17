@@ -16,6 +16,8 @@ YELLOW="\033[1;33m"
 RED="\033[1;31m"
 RESET="\033[0m"
 
+sudo apt-get install jq
+
 echo -e "${YELLOW}🧹 Nettoyage des anciens dépôts ArgoCD...${RESET}"
 argocd app delete p3-app --yes || true
 argocd repo rm https://github.com/islemk69/vburton-ikaismou-app.git || true
@@ -145,6 +147,8 @@ echo -e "${YELLOW}📦 Initialisation du dépôt local...${RESET}"
 cd "${APP_DIR}"
 if [ ! -d ".git" ]; then git init; fi
 git add .
+git config --global user.email "auto@script.fr"
+git config --global user.name "autoscript"
 git commit -m "Initial commit" || true
 git remote remove origin 2>/dev/null || true
 git remote add origin "${GITLAB_URL}/root/${PROJECT_NAME}.git"
@@ -176,6 +180,19 @@ if [ -z "$DEPLOY_TOKEN" ] || [ "$DEPLOY_TOKEN" == "null" ]; then
   exit 1
 fi
 echo -e "${GREEN}✔ Deploy Token créé avec succès.${RESET}"
+
+# === Vérification finale que GitLab HTTPS est bien prêt avant ArgoCD ===
+echo -e "${YELLOW}🕓 Vérification finale de la disponibilité HTTPS de GitLab...${RESET}"
+for i in {1..60}; do
+  STATUS=$(curl -sk -o /dev/null -w "%{http_code}" "${GITLAB_URL}/users/sign_in" || true)
+  if [[ "$STATUS" == "200" ]]; then
+    echo -e "${GREEN}✔ GitLab HTTPS est opérationnel.${RESET}"
+    break
+  fi
+  echo -e "${YELLOW}⏳ GitLab pas encore prêt (HTTP ${STATUS})... tentative ${i}/60${RESET}"
+  sleep 10
+done
+
 
 # === Connexion du dépôt GitLab à ArgoCD ===
 echo -e "${YELLOW}🔄 Connexion du dépôt GitLab à ArgoCD...${RESET}"
