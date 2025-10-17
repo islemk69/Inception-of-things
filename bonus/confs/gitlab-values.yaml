@@ -4,45 +4,32 @@ global:
     domain: local
     gitlab:
       name: gitlab.local
+
   ingress:
     enabled: false
-    class: traefik
-    tls:
-      enabled: true
+
   appConfig:
     external_url: "https://gitlab.local"
     object_store:
-      enabled: false
-    artifacts:
-      enabled: false
-    lfs:
-      enabled: false
-    uploads:
-      enabled: false
-    packages:
-      enabled: false
-    backups:
-      object_store:
-        enabled: false
+      enabled: false  
+
   gitlab-runner:
     enabled: false
 
 certmanager:
   enabled: false
 
+certmanager-issuer:
+  email: "admin@gitlab.local"
+
 prometheus:
   enabled: false
-
 nginx-ingress:
   enabled: false
-
 registry:
   enabled: false
 
-gitlab-runner:
-  enabled: false
-
-# === Composants GitLab principaux ===
+# === Composants GitLab ===
 gitlab:
   kas:
     enabled: false
@@ -79,6 +66,7 @@ gitlab:
       limits:
         memory: 2Gi
 
+# === Redis & PostgreSQL ===
 redis:
   master:
     persistence:
@@ -100,5 +88,3 @@ postgresql:
         memory: 256Mi
       limits:
         memory: 512Mi
-certmanager-issuer:
-  email: "admin@gitlab.local"

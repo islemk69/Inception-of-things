@@ -183,6 +183,7 @@ echo -e "${GREEN}✔ Deploy Token créé avec succès.${RESET}"
 
 sleep 20
 
+kubectl apply -f ../confs/gitlab-redirect.yml
 
 # === Connexion du dépôt GitLab à ArgoCD ===
 echo -e "${YELLOW}🔄 Connexion du dépôt GitLab à ArgoCD...${RESET}"

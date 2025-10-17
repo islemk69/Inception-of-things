@@ -98,6 +98,8 @@ argocd app create p3-app \
   --self-heal \
   --auto-prune
 
+kubectl apply -f ../confs/argocd-redirect.yml
+
 echo "[INFO] ✅ Déploiement terminé !"
 echo ""
 echo "🔗 Accès à ArgoCD : https://argocd.local"
