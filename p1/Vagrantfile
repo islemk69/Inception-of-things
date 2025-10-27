@@ -30,9 +30,7 @@ Vagrant.configure("2") do |config|
       echo "[ikaismouS] Bootstrap minimal..."
       sudo apt-get update -y
       sudo apt-get install -y curl ca-certificates
-      # Installation K3s avec IP fixe et SAN TLS
       curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--node-ip 192.168.56.110 --tls-san 192.168.56.110" sh -
-      # On sauvegarde le token pour que l’agent puisse le lire
       cp /var/lib/rancher/k3s/server/node-token /vagrant/node-token
       ip a show eth1
     SHELL
@@ -49,7 +47,6 @@ Vagrant.configure("2") do |config|
       vb.cpus = 2
       vb.memory = 4096
     end
-    # Provision placeholder (add K3s agent install later)
     w.vm.provision "shell", inline: <<-SHELL
       set -e
       echo "[ikaismouSW] Bootstrap minimal..."
