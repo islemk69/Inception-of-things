@@ -62,16 +62,9 @@ echo "[INFO] === Vérification / Réinitialisation du cluster k3d ==="
 if k3d cluster list | grep -q '^mycluster'; then
   echo "[OK] Le cluster 'mycluster' existe déjà."
   echo "[INFO] Réinitialisation du contenu du cluster sans suppression..."
-
-  # Démarre le cluster au cas où il est stoppé
   k3d cluster start mycluster
-
-  # Supprime tous les namespaces utilisateur (hors kube-system, kube-public, kube-node-lease, default)
   echo "[INFO] Suppression des namespaces non système..."
   kubectl get ns --no-headers | awk '!/kube-system|kube-public|kube-node-lease|default/ {print $1}' | xargs -r kubectl delete ns
-
-  # Optionnel : supprimer les CRDs si tu veux un cluster vraiment “vierge”
-  # kubectl delete crd --all
   echo "[INFO] Attente de la suppression complète des anciens namespaces..."
   while kubectl get ns | grep -qE 'Terminating'; do
    echo "  ⏳ En attente..."
