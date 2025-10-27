@@ -1,6 +1,24 @@
 #!/bin/bash
 set -e
 
+echo "[INFO] === Vérification du fichier /etc/hosts ==="
+HOSTS=(
+  "gitlab.local"
+  "argocd.local"
+  "vburton-ikaismou.local"
+)
+
+for HOST in "${HOSTS[@]}"; do
+  if ! grep -q "$HOST" /etc/hosts; then
+    echo "[INFO] Ajout de $HOST à /etc/hosts"
+    echo "127.0.0.1 $HOST" | sudo tee -a /etc/hosts >/dev/null
+  else
+    echo "[OK] $HOST déjà présent dans /etc/hosts"
+  fi
+done
+
+echo ""
+
 echo "[INFO] === Installation de Docker ==="
 if ! command -v docker &>/dev/null; then
   sudo apt-get update
@@ -39,9 +57,37 @@ else
   echo "k3d déjà installé"
 fi
 
-echo "[INFO] === Création du cluster k3d ==="
-k3d cluster delete mycluster || true
-k3d cluster create mycluster --servers 1 --agents 1 -p "80:80@loadbalancer" -p "443:443@loadbalancer" --host-alias 10.13.200.149:gitlab.local
+echo "[INFO] === Vérification / Réinitialisation du cluster k3d ==="
+
+if k3d cluster list | grep -q '^mycluster'; then
+  echo "[OK] Le cluster 'mycluster' existe déjà."
+  echo "[INFO] Réinitialisation du contenu du cluster sans suppression..."
+
+  # Démarre le cluster au cas où il est stoppé
+  k3d cluster start mycluster
+
+  # Supprime tous les namespaces utilisateur (hors kube-system, kube-public, kube-node-lease, default)
+  echo "[INFO] Suppression des namespaces non système..."
+  kubectl get ns --no-headers | awk '!/kube-system|kube-public|kube-node-lease|default/ {print $1}' | xargs -r kubectl delete ns
+
+  # Optionnel : supprimer les CRDs si tu veux un cluster vraiment “vierge”
+  # kubectl delete crd --all
+  echo "[INFO] Attente de la suppression complète des anciens namespaces..."
+  while kubectl get ns | grep -qE 'Terminating'; do
+   echo "  ⏳ En attente..."
+   sleep 5
+  done
+
+else
+  echo "[INFO] Le cluster 'mycluster' n'existe pas, création..."
+  IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+  k3d cluster create mycluster \
+    --servers 1 --agents 1 \
+    -p "80:80@loadbalancer" \
+    -p "443:443@loadbalancer" \
+    --host-alias ${IP}:gitlab.local
+fi
+
 
 echo "[INFO] === Installation d'ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
@@ -108,4 +154,4 @@ echo "🔑 Mot de passe : ${ADMIN_PASS}"
 echo ""
 echo "⚠️ Assure-toi d'avoir dans ton /etc/hosts :"
 echo "    127.0.0.1 argocd.local"
-echo "    127.0.0.1 ikaismou.local"
+echo "    127.0.0.1 vburton-ikaismou.local"
